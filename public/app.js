@@ -20,7 +20,7 @@ const EMO = ['😏', '🤔', '😱', '🙄', '🤥', '👏'];
 /* 그림 — 전부 /img 의 제미나이 그림 */
 const cardImg = c => !c ? '/img/front.webp'
   : c.k === 'subject' ? '/img/card_subject.webp'
-  : c.k === 'black' ? '/img/card_black.webp'
+  : c.k === 'black' ? '/img/card_blank.webp'
   : c.r ? `/img/card_k_${c.k}.webp` : `/img/card_${c.k}.webp`;
 const faceImg = k => `/img/c_${k}.webp`;
 /* 말은 "이건 두꺼비야"(toad) 와 "이건 두꺼비가 아니야"(!toad) 두 꼴 */
@@ -40,7 +40,7 @@ const claimName = cl => (isNeg(cl) ? `${NAMES[baseOf(cl)]} 아님` : NAMES[cl]);
 
 /* 모든 그림을 미리 받아 둔다 — 카드가 처음 뒤집힐 때 빈 칸이 보이지 않게 */
 (() => {
-  const list = ['back', 'rback', 'front', 'card_subject', 'card_black'];
+  const list = ['back', 'rback', 'front', 'card_subject', 'card_blank'];
   for (const k of ALL_KINDS) list.push(`card_${k}`, `c_${k}`);
   for (const k of ALL_KINDS.slice(0, 7)) list.push(`card_k_${k}`, `k_${k}`);
   setTimeout(() => list.forEach(n => { const i = new Image(); i.src = `/img/${n}.webp`; }), 600);
@@ -800,6 +800,7 @@ function renderGame(prev) {
   animateFx(prev);
   renderHist();
   $('#reacts').hidden = isSpec();
+  requestAnimationFrame(layoutStage);
 
   prevRows = {};
   for (const p of S.players) prevRows[p.id] = Object.assign({}, p.row);
@@ -927,6 +928,27 @@ function tick() {
   fg.classList.toggle('hot', p <= .2);
 }
 requestAnimationFrame(tick);
+
+/* 넓은 화면 — 무대를 위쪽 자리들 아래 빈 곳 한가운데에 두고, 카드 크기를 남은 높이에 맞춘다.
+   할 일 판이 뜨면 테이블이 낮아지는데, 그대로 두면 위쪽 가운데 자리와 카드가 겹친다. */
+function layoutStage() {
+  const stage = $('#stage'), table = $('#table');
+  if (innerWidth <= 760) { stage.style.removeProperty('--st'); stage.style.removeProperty('--cw'); return; }
+  const T = table.getBoundingClientRect();
+  if (!T.height) return;
+  const sw = stage.offsetWidth, sl = T.left + T.width / 2 - sw / 2;
+  let topB = 0;
+  for (const s of document.querySelectorAll('#opps .seat')) {
+    const r = s.getBoundingClientRect();
+    if (r.right > sl + 10 && r.left < sl + sw - 10) topB = Math.max(topB, r.bottom - T.top);
+  }
+  const avail = T.height - topB - 14;
+  const big = $('#flip').classList.contains('big');
+  const want = (big ? 150 : 116) * 716 / 480;
+  const h = Math.max(96, Math.min(want, avail - 6));
+  stage.style.setProperty('--cw', Math.round(h * 480 / 716) + 'px');
+  stage.style.setProperty('--st', Math.round(topB + 8 + Math.max(avail, h) / 2) + 'px');
+}
 
 /* 창 크기가 바뀌면 자리 배치를 다시 */
 let rsT = 0;

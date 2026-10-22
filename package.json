@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "test": "node test/sim.js"
+    "test": "node test/rules.js && node test/sim.js && GAMES=400 node test/soak.js"
   },
   "dependencies": {
     "ws": "^8.18.0"

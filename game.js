@@ -446,8 +446,11 @@ function bluffClaim(room, target, card) {
 
 function botGive(room, p) {
   // 많이 든 생물부터 털어 낸다. 특수 카드는 좋은 패라 아껴 두다 가끔 쓴다.
+  // 누군가 한 장만 더 받으면 지는 생물을 쥐고 있으면 그 카드가 가장 좋은 패다.
   const count = k => p.hand.filter(c => c.k === k).length;
-  const worth = c => (R.isSpecial(c) ? -3 : 0) + count(c.k) + (Math.random() - 0.5) * 3;
+  const others0 = room.players.filter(q => q.id !== p.id);
+  const killer = k => others0.some(q => (q.row[k] || 0) === room.loseAt - 1);
+  const worth = c => (R.isSpecial(c) ? -3 : 0) + count(c.k) + (killer(c.k) ? 5 : 0) + (Math.random() - 0.5) * 3;
   const card = p.hand.slice().sort((a, b) => worth(b) - worth(a))[0];
   const others = room.players.filter(q => q.id !== p.id);
   const target = others.sort((a, b) => targetScore(room, b, card.k) - targetScore(room, a, card.k))[0];
@@ -463,6 +466,10 @@ function botDecide(room, p) {
   const left = unseen(room, p, base);
   let pTrue = left <= 0 ? 0.03 : 0.18 + 0.62 * Math.min(1, left / R.PER_KIND);
   if (neg) pTrue = 1 - pTrue;                      // "아니야" 는 뒤집어서 믿는다
+  // 한 장만 더 받으면 지는 생물이라고 들었다 — 틀렸을 때 그 생물을 떠안는 쪽을 피한다
+  //  "박쥐야" 를 거짓말이라 했다가 틀리면 박쥐를 떠안는다 → 믿는 쪽으로
+  //  "박쥐가 아니야" 를 믿었다가 틀리면 박쥐를 떠안는다 → 의심하는 쪽으로
+  if ((p.row[base] || 0) === room.loseAt - 1) pTrue = neg ? Math.min(pTrue, 0.25) : Math.max(pTrue, 0.75);
   const passer = playerOf(room, c.from);
   if (passer && passer.hand.length <= 2) pTrue += 0.1;
   call(room, p, Math.random() < pTrue);
@@ -500,7 +507,9 @@ function autoAct(room, p) {
   if (room.tribute) return botTribute(room, p);
   if (!room.chain) return p.hand.length ? botGive(room, p) : finish(room, p, 'empty');
   if (room.chain.step === 'pass') return botPass(room, p);
-  return botDecide(room, p);
+  botDecide(room, p);
+  // 끊긴 사람 · 시간 초과로 대신 둘 때 몰래 보기를 골랐으면 넘기기까지 이어서 한다 — 안 그러면 판이 한 번 더 멈춘다
+  if (!p.bot && actorOf(room) === p && room.chain && room.chain.step === 'pass') botPass(room, p);
 }
 
 /* ─────────────────────────── 통신 ─────────────────────────── */

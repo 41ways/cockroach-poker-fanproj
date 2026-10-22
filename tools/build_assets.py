@@ -37,7 +37,7 @@ for n in names:
 rframe = Image.open('raw/rframe.png').convert('RGBA').resize((CW, CH), Image.LANCZOS)
 save(Image.open('raw/rback.png').convert('RGB').resize((CW, CH), Image.LANCZOS), 'rback')
 # 검은 카드는 원작처럼 가운데가 비어 있다 — black.png 의 나방 무늬를 걷어 낸 black_blank.png
-save(Image.open('raw/black_blank.png').convert('RGB').resize((CW, CH), Image.LANCZOS), 'card_black')
+save(Image.open('raw/black_blank.png').convert('RGB').resize((CW, CH), Image.LANCZOS), 'card_blank')
 for n in names[:7] + ['subject']:
     c = Image.open(f'{OUT}/k_{n}.png').convert('RGBA')
     c = c.crop(c.getbbox())
