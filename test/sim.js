@@ -56,13 +56,13 @@ function humanMove(ws, me) {
   }
   if (s.chain) {
     if (s.chain.to !== me) return;
-    if (s.chain.step === 'pass') return send({ t: 'pass', to: pick(s.chain.targets), claim: pick(s.claims) });
+    if (s.chain.step === 'pass') return send({ t: 'pass', to: pick(s.chain.targets), claim: (Math.random() < 0.3 ? '!' : '') + pick(s.claims) });
     if (s.chain.targets.length && Math.random() < 0.3) return send({ t: 'peek' });
     return send({ t: 'call', sayTrue: Math.random() < 0.5 });
   }
   if (s.starter === me && s.hand.length) {
     const others = s.players.filter(p => p.id !== me);
-    send({ t: 'give', card: pick(s.hand).id, to: pick(others).id, claim: pick(s.claims) });
+    send({ t: 'give', card: pick(s.hand).id, to: pick(others).id, claim: (Math.random() < 0.3 ? '!' : '') + pick(s.claims) });
   }
 }
 

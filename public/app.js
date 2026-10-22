@@ -23,14 +23,20 @@ const cardImg = c => !c ? '/img/front.webp'
   : c.k === 'black' ? '/img/card_black.webp'
   : c.r ? `/img/card_k_${c.k}.webp` : `/img/card_${c.k}.webp`;
 const faceImg = k => `/img/c_${k}.webp`;
-const claimImg = cl => (cl === 'royal' ? '/img/k_roach.webp' : faceImg(cl));
+/* 말은 "이건 두꺼비야"(toad) 와 "이건 두꺼비가 아니야"(!toad) 두 꼴 */
+const isNeg = cl => typeof cl === 'string' && cl[0] === '!';
+const baseOf = cl => (isNeg(cl) ? cl.slice(1) : cl);
+const claimImg = cl => (baseOf(cl) === 'royal' ? '/img/k_roach.webp' : faceImg(baseOf(cl)));
 const backImg = () => (S && S.cfg.edition === 'royal' ? '/img/rback.webp' : '/img/back.webp');
 const cardName = c => (!c ? '' : c.r ? `왕 ${NAMES[c.k]}` : NAMES[c.k]);
 /** 카드 한 장 — 그림 위 아래쪽 이름 띠에 이름을 얹는다 */
 const cardFace = (c, cls = '') => `<span class="cardf ${cls}${c && c.k === 'black' ? ' dark' : ''}"><img src="${cardImg(c)}" alt="${cardName(c)}"><span class="cname">${c ? (c.r ? NAMES[c.k] : cardName(c)) : ''}</span></span>`;
 /** 조사 — 받침이 있으면 a, 없으면 b */
 const josa = (w, a, b) => { const ch = String(w).charCodeAt(String(w).length - 1); return (ch >= 0xac00 && ch <= 0xd7a3 && (ch - 0xac00) % 28) ? a : b; };
-const claimSay = cl => `${NAMES[cl]}${josa(NAMES[cl], '이야', '야')}`;
+/** "두꺼비야" / "두꺼비가 아니야" */
+const claimSay = cl => { const w = NAMES[baseOf(cl)]; return isNeg(cl) ? `${w}${josa(w, '이', '가')} 아니야` : `${w}${josa(w, '이야', '야')}`; };
+/** 짧게 — "두꺼비" / "두꺼비 아님" */
+const claimName = cl => (isNeg(cl) ? `${NAMES[baseOf(cl)]} 아님` : NAMES[cl]);
 
 /* 모든 그림을 미리 받아 둔다 — 카드가 처음 뒤집힐 때 빈 칸이 보이지 않게 */
 (() => {
@@ -459,7 +465,7 @@ let revealKey = '';
 let lastFx = 0;
 let prevRows = {};
 
-function resetSel() { sel = { pile: null, ids: [], to: null, claim: null }; }
+function resetSel() { sel = { pile: null, ids: [], to: null, claim: null, neg: false }; }
 
 /** 지금 내가 해야 하는 일 */
 function myMode() {
@@ -617,15 +623,23 @@ $('#opps').addEventListener('click', e => {
 });
 
 function claimsHTML() {
-  return `<div class="claims">${S.claims.map(cl =>
-    `<button class="claim-b${cl === 'royal' ? ' royal' : ''}${sel.claim === cl ? ' on' : ''}" data-claim="${cl}"><img src="${claimImg(cl)}" alt="">${NAMES[cl]}</button>`).join('')}</div>`;
+  const neg = !!sel.neg;
+  return `<div class="say-mode" role="radiogroup" aria-label="말하는 꼴">
+      <button class="${neg ? '' : 'on'}" data-neg="0">“이건 ○○야”</button>
+      <button class="${neg ? 'on' : ''}" data-neg="1">“이건 ○○가 아니야”</button>
+    </div>
+    <div class="claims${neg ? ' negs' : ''}">${S.claims.map(cl => {
+      const full = (neg ? '!' : '') + cl;
+      return `<button class="claim-b${cl === 'royal' ? ' royal' : ''}${neg ? ' neg' : ''}${sel.claim === full ? ' on' : ''}" data-claim="${full}"><span class="ci"><img src="${claimImg(cl)}" alt=""></span>${NAMES[cl]}</button>`;
+    }).join('')}</div>`;
 }
 
 function tributeValid() {
   if (!S.tribute) return false;
   const opts = S.hand.filter(c => c.k !== 'subject' && c.k !== 'black');
   const cards = sel.ids.map(id => opts.find(c => c.id === id)).filter(Boolean);
-  const match = c => c.k !== 'subject' && c.k !== 'black' && (c.r ? (S.tribute.claim === c.k || S.tribute.claim === 'royal') : S.tribute.claim === c.k);
+  const plain = (c, cl) => (c.r ? (cl === c.k || cl === 'royal') : cl === c.k);
+  const match = c => c.k !== 'subject' && c.k !== 'black' && (isNeg(S.tribute.claim) ? !plain(c, baseOf(S.tribute.claim)) : plain(c, S.tribute.claim));
   if (opts.length < 2) return cards.length === opts.length;
   if (cards.length === 1) return match(cards[0]);
   return cards.length === 2;
@@ -647,8 +661,8 @@ function renderAct(mode) {
     const can = c.targets.length > 0;
     t.innerHTML = `${esc(nameOf(c.from))}: “이건 <span style="color:var(--gold-hi)">${claimSay(c.claim)}</span>”<small>믿을까, 의심할까, 몰래 보고 남에게 넘길까</small>`;
     body.innerHTML = `<div class="chips">
-      <button class="chip ok" data-call="1"><img src="/img/chip_ok.webp" alt=""><span>진짜다</span><small>${NAMES[c.claim]} 맞아</small></button>
-      <button class="chip no" data-call="0"><img src="/img/chip_no.webp" alt=""><span>거짓말!</span><small>${NAMES[c.claim]} 아니야</small></button>
+      <button class="chip ok" data-call="1"><img src="/img/chip_ok.webp" alt=""><span>진짜다</span><small>${isNeg(c.claim) ? `정말 ${NAMES[baseOf(c.claim)]} 아니야` : `${NAMES[c.claim]} 맞아`}</small></button>
+      <button class="chip no" data-call="0"><img src="/img/chip_no.webp" alt=""><span>거짓말!</span><small>${isNeg(c.claim) ? `사실 ${NAMES[baseOf(c.claim)]}${josa(NAMES[baseOf(c.claim)], '이야', '야')}` : `${NAMES[c.claim]} 아니야`}</small></button>
       <button class="chip peek" id="bPeek" ${can ? '' : 'disabled'}><img src="/img/chip_peek.webp" alt=""><span>몰래 보고 넘기기</span><small>${can ? `${c.targets.length}명에게 넘길 수 있음` : S.canPass ? '모두 이미 본 카드' : '2인 로얄은 넘기기 없음'}</small></button>
     </div>`;
   } else if (mode === 'pass') {
@@ -663,7 +677,7 @@ function renderAct(mode) {
     const tr = S.tribute;
     const cn = tr.card === 'black' ? '검은 카드' : '신하 카드';
     t.innerHTML = `${cn}${josa(cn, '을', '를')} 떠안았어요! 손으로 가져가는 대신…`;
-    body.innerHTML = `<p class="hint-line"><b style="color:var(--ink)">“${NAMES[tr.claim]}”${josa(NAMES[tr.claim], '과', '와')} 맞는 카드 1장</b>, 또는 <b style="color:var(--ink)">아무 카드 2장</b>을 손패에서 눌러 앞에 내려놓으세요 · ${sel.ids.length}장 고름</p>
+    body.innerHTML = `<p class="hint-line"><b style="color:var(--ink)">“${claimSay(tr.claim)}”에 맞는 카드 1장</b>, 또는 <b style="color:var(--ink)">아무 카드 2장</b>을 손패에서 눌러 앞에 내려놓으세요 · ${sel.ids.length}장 고름</p>
       <div class="act-row"><button class="btn gold" id="bTrib" ${tributeValid() ? '' : 'disabled'}>내려놓기</button></div>`;
   }
 }
@@ -671,6 +685,12 @@ function renderAct(mode) {
 $('#actBody').addEventListener('click', e => {
   const cl = e.target.closest('[data-claim]');
   if (cl) { sel.claim = cl.dataset.claim; sfx.pop(); return renderGame(); }
+  const ng = e.target.closest('[data-neg]');
+  if (ng) {
+    sel.neg = ng.dataset.neg === '1';
+    if (sel.claim) sel.claim = (sel.neg ? '!' : '') + baseOf(sel.claim);   // 고른 생물은 그대로 두고 꼴만 바꾼다
+    sfx.pop(); return renderGame();
+  }
   const ch = e.target.closest('[data-call]');
   if (ch) { send({ t: 'call', sayTrue: ch.dataset.call === '1' }); return; }
   if (e.target.closest('#bPeek')) { send({ t: 'peek' }); sfx.flip(); return; }
@@ -701,7 +721,7 @@ function renderStage(prev) {
 
   const hops = (R ? R.path : c ? c.path : []) || [];
   path.innerHTML = hops.length > 1 ? hops.map((h, i) =>
-    `${i ? '<span class="arr">›</span>' : ''}<span class="hop">${esc(nameOf(h.from))} → ${esc(nameOf(h.to))} <b>${NAMES[h.claim]}</b></span>`).join('') : '';
+    `${i ? '<span class="arr">›</span>' : ''}<span class="hop">${esc(nameOf(h.from))} → ${esc(nameOf(h.to))} <b>${claimName(h.claim)}</b></span>`).join('') : '';
 
   if (R) {
     const key = JSON.stringify([R.caller, R.passer, R.claim, R.card, S.history.length]);
@@ -720,7 +740,7 @@ function renderStage(prev) {
       }, 1050);
     }
     bubble.hidden = false;
-    bubble.innerHTML = `<small>${esc(nameOf(R.passer))} → ${esc(nameOf(R.caller))}</small>“이건 <span class="claim">${NAMES[R.claim]}</span>”<span class="said ${R.sayTrue ? 'yes' : 'no'}">${esc(nameOf(R.caller))}: ${R.sayTrue ? '진짜다!' : '거짓말!'}</span>`;
+    bubble.innerHTML = `<small>${esc(nameOf(R.passer))} → ${esc(nameOf(R.caller))}</small>“이건 <span class="claim">${claimSay(R.claim)}</span>”<span class="said ${R.sayTrue ? 'yes' : 'no'}">${esc(nameOf(R.caller))}: ${R.sayTrue ? '진짜다!' : '거짓말!'}</span>`;
     verdict.className = 'verdict ' + (R.right ? 'right' : 'wrong');
     verdict.innerHTML = `<span class="v-big">${R.right ? `${esc(nameOf(R.caller))} 맞혔다!` : `${esc(nameOf(R.caller))} 틀렸다!`}</span>
       <small>정체는 <b>${cardName(R.card)}</b>${R.truth ? ' — 진짜였다' : ' — 거짓말이었다'} · ${who(R.taker)} 가져간다</small>`;
@@ -737,7 +757,7 @@ function renderStage(prev) {
     flip.classList.toggle('open', !!known);
     flip.classList.toggle('wobble', !known);
     bubble.hidden = false;
-    bubble.innerHTML = `<small>${esc(nameOf(c.from))} → ${esc(nameOf(c.to))}</small>“이건 <span class="claim">${NAMES[c.claim]}</span>”`
+    bubble.innerHTML = `<small>${esc(nameOf(c.from))} → ${esc(nameOf(c.to))}</small>“이건 <span class="claim">${claimSay(c.claim)}</span>”`
       + (known && c.to !== me ? `<small style="margin-top:4px">나만 아는 정체: <b>${cardName(known)}</b></small>` : '');
     if (c.to === me) status.innerHTML = '';
     else status.innerHTML = c.step === 'pass'
@@ -847,7 +867,7 @@ function renderHist() {
   const ol = $('#histList');
   if (!S.history || !S.history.length) { ol.innerHTML = '<li style="display:block;color:var(--muted)">아직 뒤집은 카드가 없어요</li>'; return; }
   ol.innerHTML = S.history.map(h => `<li><img src="${cardImg(h.card)}" alt="">
-    <span>${esc(nameOf(h.passer))} → ${esc(nameOf(h.caller))} “${NAMES[h.claim]}”<br>
+    <span>${esc(nameOf(h.passer))} → ${esc(nameOf(h.caller))} “${claimSay(h.claim)}”<br>
     <span class="${h.right ? 'r' : 'w'}">${esc(nameOf(h.caller))} ${h.right ? '맞힘' : '틀림'}</span> · ${cardName(h.card)} → <b>${esc(nameOf(h.taker))}</b></span></li>`).join('');
 }
 $('#bHist').onclick = () => { $('#hist').hidden = !$('#hist').hidden; };

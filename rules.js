@@ -65,8 +65,21 @@ function deal(deck, n, ed) {
   return { hands, penalty };
 }
 
+/**
+ * 말은 두 가지 꼴이다 — "이건 두꺼비야"(toad) 와 "이건 두꺼비가 아니야"(!toad).
+ * 아니라는 말은 그 생물이라는 말을 뒤집은 것이다. 검은 카드만은 어떤 말이든 틀린다.
+ */
+const NOT = '!';
+const isNeg = claim => typeof claim === 'string' && claim[0] === NOT;
+const baseOf = claim => (isNeg(claim) ? claim.slice(1) : claim);
+const isClaim = (ed, claim) => claimsOf(ed).includes(baseOf(claim));
+
 /** 카드가 이 말에 맞나 */
 function truthOf(card, claim) {
+  if (isNeg(claim)) return card.k !== 'black' && !truthOf(card, baseOf(claim));
+  return truthPlain(card, claim);
+}
+function truthPlain(card, claim) {
   if (card.k === 'black') return false;                 // 검은 카드 — 무엇이라 해도 틀린다
   if (card.k === 'subject') return claim !== 'royal';   // 신하 — 아무 생물이나 되지만 왕은 아니다
   if (card.r) return claim === card.k || claim === 'royal';
@@ -91,6 +104,6 @@ const lostByRow = (row, at) => Object.values(row).some(v => v >= at);
 
 module.exports = {
   KINDS, ROYAL_KINDS, NAMES, PER_KIND, EDITIONS,
-  kindsOf, claimsOf, isSpecial, loseAt, penaltySize, canPass,
+  kindsOf, claimsOf, isSpecial, NOT, isNeg, baseOf, isClaim, loseAt, penaltySize, canPass,
   makeDeck, deal, truthOf, judge, tributeMatch, emptyRow, lostByRow,
 };

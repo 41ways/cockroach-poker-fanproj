@@ -38,12 +38,12 @@ function move(c) {
   }
   if (s.chain) {
     if (s.chain.to !== me) return;
-    if (s.chain.step === 'pass') return c.send({ t: 'pass', to: pick(s.chain.targets), claim: pick(s.claims) });
+    if (s.chain.step === 'pass') return c.send({ t: 'pass', to: pick(s.chain.targets), claim: (Math.random() < 0.3 ? '!' : '') + pick(s.claims) });
     if (s.chain.targets.length && Math.random() < 0.3) return c.send({ t: 'peek' });
     return c.send({ t: 'call', sayTrue: Math.random() < 0.5 });
   }
   if (s.starter === me && s.hand.length) {
-    c.send({ t: 'give', card: pick(s.hand).id, to: pick(s.players.filter(p => p.id !== me)).id, claim: pick(s.claims) });
+    c.send({ t: 'give', card: pick(s.hand).id, to: pick(s.players.filter(p => p.id !== me)).id, claim: (Math.random() < 0.3 ? '!' : '') + pick(s.claims) });
   }
 }
 

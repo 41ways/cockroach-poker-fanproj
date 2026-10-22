@@ -290,7 +290,7 @@ function give(room, p, cardId, to, claim) {
   if (room.phase !== 'playing' || room.reveal || room.tribute || room.chain || room.starter !== p.id) return;
   const i = p.hand.findIndex(c => c.id === cardId);
   const target = playerOf(room, to);
-  if (i < 0 || !target || target.id === p.id || !R.claimsOf(edOf(room)).includes(claim)) return;
+  if (i < 0 || !target || target.id === p.id || !R.isClaim(edOf(room), claim)) return;
   const [card] = p.hand.splice(i, 1);
   room.chain = { card, from: p.id, to: target.id, claim, seen: [p.id], path: [{ from: p.id, to: target.id, claim }], step: 'decide' };
   ev(room, { kind: 'give', by: p.id, to: target.id, claim });
@@ -312,7 +312,7 @@ function peek(room, p) {
 function pass(room, p, to, claim) {
   const c = room.chain;
   if (room.phase !== 'playing' || room.reveal || !c || c.to !== p.id || c.step !== 'pass') return;
-  if (!passTargets(room).includes(to) || !R.claimsOf(edOf(room)).includes(claim)) return;
+  if (!passTargets(room).includes(to) || !R.isClaim(edOf(room), claim)) return;
   c.from = p.id; c.to = to; c.claim = claim; c.step = 'decide';
   c.path.push({ from: p.id, to, claim });
   ev(room, { kind: 'give', by: p.id, to, claim, pass: true });
@@ -418,7 +418,9 @@ function targetScore(room, q, kind) {
 
 /** 이 카드를 두고 무엇이라 말할까 — 가끔은 진짜, 대개는 상대가 많이 쌓은 생물이라고 우긴다 */
 function bluffClaim(room, target, card) {
-  const claims = R.claimsOf(edOf(room));
+  const plain = R.claimsOf(edOf(room));
+  // 다섯 번에 한 번쯤은 "○○가 아니야" 로 말한다 — 상대가 많이 쌓은 생물을 아니라고 하면 받는 쪽이 더 헷갈린다
+  const claims = Math.random() < 0.2 ? plain.map(c => R.NOT + c) : plain;
   const truths = claims.filter(cl => R.truthOf(card, cl));
   if (truths.length && Math.random() < 0.38) return pick(truths);
   const lies = claims.filter(cl => !R.truthOf(card, cl));
@@ -439,10 +441,12 @@ function botGive(room, p) {
 function botDecide(room, p) {
   const c = room.chain;
   const targets = passTargets(room);
-  const danger = (p.row[c.claim] || 0) >= room.loseAt - 2;
+  const base = R.baseOf(c.claim), neg = R.isNeg(c.claim);
+  const danger = (p.row[base] || 0) >= room.loseAt - 2;
   if (targets.length && Math.random() < (danger ? 0.55 : 0.28)) return peek(room, p);
-  const left = unseen(room, p, c.claim);
+  const left = unseen(room, p, base);
   let pTrue = left <= 0 ? 0.03 : 0.18 + 0.62 * Math.min(1, left / R.PER_KIND);
+  if (neg) pTrue = 1 - pTrue;                      // "아니야" 는 뒤집어서 믿는다
   const passer = playerOf(room, c.from);
   if (passer && passer.hand.length <= 2) pTrue += 0.1;
   call(room, p, Math.random() < pTrue);

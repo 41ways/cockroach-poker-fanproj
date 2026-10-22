@@ -442,9 +442,20 @@ body.in-game { overflow: hidden; }
   display: flex; flex-direction: column; align-items: center; gap: 2px; width: 70px; padding: 6px 4px 5px; border-radius: 14px;
   border: 1px solid rgba(227, 191, 106, .22); background: rgba(255, 255, 255, .04); font-size: 12.5px; transition: all .15s;
 }
-.claim-b img { width: 44px; height: 44px; object-fit: contain; filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .5)); transition: transform .15s; }
+.claim-b img { display: block; width: 44px; height: 44px; object-fit: contain; filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .5)); transition: transform .15s; }
 .claim-b:hover img { transform: scale(1.1) rotate(-4deg); }
 .claim-b.on { border-color: var(--gold-hi); background: rgba(227, 191, 106, .16); box-shadow: 0 0 0 2px rgba(227, 191, 106, .3) inset; }
+.say-mode { display: inline-flex; background: rgba(0, 0, 0, .35); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+.say-mode button { border: 0; background: none; padding: 6px 14px; border-radius: 999px; font-size: 13.5px; color: var(--ink-2); font-weight: 700; }
+.say-mode button.on { background: linear-gradient(180deg, #fbe7a8, #c99a43); color: #3a250b; }
+.say-mode button[data-neg="1"].on { background: linear-gradient(180deg, #f2a3a3, #b8434b); color: #fff; }
+.claim-b .ci { position: relative; display: block; }
+.claim-b.neg .ci::after {
+  content: ''; position: absolute; left: 50%; top: 50%; width: 120%; height: 4px; border-radius: 2px;
+  background: #d0484f; box-shadow: 0 0 0 1.5px rgba(0, 0, 0, .5); transform: translate(-50%, -50%) rotate(-38deg);
+}
+.claim-b.neg img { filter: grayscale(.35) brightness(.85) drop-shadow(0 3px 4px rgba(0, 0, 0, .5)); }
+.claim-b.neg.on { border-color: #f2a3a3; background: rgba(208, 72, 79, .18); box-shadow: 0 0 0 2px rgba(208, 72, 79, .35) inset; }
 .claim-b.royal img { filter: drop-shadow(0 0 6px rgba(251, 231, 168, .6)); }
 .act-row { display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; }
 .chips { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; }
@@ -642,6 +653,11 @@ body.in-game { overflow: hidden; }
   .me-name { font-size: 14px; } .me-sub { font-size: 11px; }
   .hand { padding-top: 12px; }
   .pile { width: 56px; }
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  .stage { width: 300px; }
+  .penalty { left: calc(100% + 8px); width: 70px; }
+  .pen-stack, .pen-top { width: 54px; } .pen-top { margin-top: -46px; }
 }
 @media (min-width: 761px) and (max-height: 960px) {
   .flip { width: 112px; } .flip.big { width: 146px; }
