@@ -742,7 +742,7 @@ function renderStage(prev) {
     bubble.hidden = false;
     bubble.innerHTML = `<small>${esc(nameOf(R.passer))} → ${esc(nameOf(R.caller))}</small>“이건 <span class="claim">${claimSay(R.claim)}</span>”<span class="said ${R.sayTrue ? 'yes' : 'no'}">${esc(nameOf(R.caller))}: ${R.sayTrue ? '진짜다!' : '거짓말!'}</span>`;
     verdict.className = 'verdict ' + (R.right ? 'right' : 'wrong');
-    verdict.innerHTML = `<span class="v-big">${R.right ? `${esc(nameOf(R.caller))} 맞혔다!` : `${esc(nameOf(R.caller))} 틀렸다!`}</span>
+    verdict.innerHTML = `<span class="v-big">${who(R.caller)} ${R.right ? '맞혔다!' : '틀렸다!'}</span>
       <small>정체는 <b>${cardName(R.card)}</b>${R.truth ? ' — 진짜였다' : ' — 거짓말이었다'} · ${who(R.taker)} 가져간다</small>`;
     status.innerHTML = '';
     return;
