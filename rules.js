@@ -11,7 +11,9 @@
  *  k  생물(roach …) 또는 특수 카드('subject' 신하 · 'black' 검은 카드)
  *  r  왕 카드면 true — 그 생물로도, "왕" 으로도 맞다
  *
- * 앞에 같은 생물이 4장(로얄 2인은 5장) 쌓이거나, 내밀 차례인데 손에 카드가 없으면 진다. 왕 카드도 그 생물로 센다.
+ * 2인은 두 판 모두 넘기기가 없고 같은 생물 5장이면 진다. 기본판 2인은 카드 10장을 보지 않고 빼고 나눈다.
+ *
+ * 앞에 같은 생물이 4장(2인은 5장) 쌓이거나, 내밀 차례인데 손에 카드가 없으면 진다. 왕 카드도 그 생물로 센다.
  */
 
 const KINDS = ['roach', 'rat', 'stink', 'scorp', 'toad', 'bat', 'fly', 'spider'];
@@ -28,10 +30,12 @@ const kindsOf = ed => (ed === 'royal' ? ROYAL_KINDS : KINDS);
 /** 말할 수 있는 것 — 로얄판에는 "왕" 이 하나 더 있다 */
 const claimsOf = ed => (ed === 'royal' ? ROYAL_KINDS.concat('royal') : KINDS.slice());
 const isSpecial = c => c.k === 'subject' || c.k === 'black';
-const loseAt = (ed, n) => (ed === 'royal' && n === 2 ? 5 : 4);
+const loseAt = (ed, n) => (n === 2 ? 5 : 4);
 const penaltySize = (ed, n) => (ed === 'royal' ? (n === 2 ? 16 : 7) : 0);
-/** 넘기기 — 로얄 2인은 금지(기본판 2인은 넘길 사람이 없어서 저절로 안 된다) */
-const canPass = (ed, n) => !(ed === 'royal' && n === 2);
+/** 기본판 2인 — 나누기 전에 아무도 보지 않고 빼 두는 장 수 */
+const removedSize = (ed, n) => (ed === 'base' && n === 2 ? 10 : 0);
+/** 넘기기 — 2인은 두 판 모두 금지 (원작 규칙서의 2인 규칙) */
+const canPass = (ed, n) => n > 2;
 
 function makeDeck(ed) {
   const deck = [];
@@ -51,6 +55,7 @@ function makeDeck(ed) {
  */
 function deal(deck, n, ed) {
   const d = deck.slice();
+  const removed = d.splice(0, removedSize(ed, n));   // 기본판 2인 — 상자에 도로 넣는다
   const penalty = d.splice(0, penaltySize(ed, n));
   const base = Math.floor(d.length / n);
   let extra = d.length - base * n;
@@ -62,7 +67,7 @@ function deal(deck, n, ed) {
     hands.push(d.splice(0, take));
   }
   penalty.push(...d);                 // 로얄판에서 남은 장
-  return { hands, penalty };
+  return { hands, penalty, removed };
 }
 
 /**
@@ -104,6 +109,6 @@ const lostByRow = (row, at) => Object.values(row).some(v => v >= at);
 
 module.exports = {
   KINDS, ROYAL_KINDS, NAMES, PER_KIND, EDITIONS,
-  kindsOf, claimsOf, isSpecial, NOT, isNeg, baseOf, isClaim, loseAt, penaltySize, canPass,
+  kindsOf, claimsOf, isSpecial, NOT, isNeg, baseOf, isClaim, loseAt, penaltySize, removedSize, canPass,
   makeDeck, deal, truthOf, judge, tributeMatch, emptyRow, lostByRow,
 };

@@ -28,6 +28,7 @@ function checkState(s, room) {
   for (const p of room.players) n += p.hand.length + Object.values(p.row).reduce((a, b) => a + b, 0);
   n += room.chain ? 1 : 0;
   n += room.penalty ? room.penalty.length : 0;
+  n += room.removed || 0;
   if (room.reveal) n += 1;
   assert.strictEqual(n, total, `카드가 ${n}장 (${total}장이어야 함) phase=${room.phase}`);
   for (const p of room.players) for (const k of Object.keys(p.row)) assert.ok(p.row[k] <= R.PER_KIND + 1);

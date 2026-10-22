@@ -663,7 +663,7 @@ function renderAct(mode) {
     body.innerHTML = `<div class="chips">
       <button class="chip ok" data-call="1"><img src="/img/chip_ok.webp" alt=""><span>진짜다</span><small>${isNeg(c.claim) ? `정말 ${NAMES[baseOf(c.claim)]} 아니야` : `${NAMES[c.claim]} 맞아`}</small></button>
       <button class="chip no" data-call="0"><img src="/img/chip_no.webp" alt=""><span>거짓말!</span><small>${isNeg(c.claim) ? `사실 ${NAMES[baseOf(c.claim)]}${josa(NAMES[baseOf(c.claim)], '이야', '야')}` : `${NAMES[c.claim]} 아니야`}</small></button>
-      <button class="chip peek" id="bPeek" ${can ? '' : 'disabled'}><img src="/img/chip_peek.webp" alt=""><span>몰래 보고 넘기기</span><small>${can ? `${c.targets.length}명에게 넘길 수 있음` : S.canPass ? '모두 이미 본 카드' : '2인 로얄은 넘기기 없음'}</small></button>
+      <button class="chip peek" id="bPeek" ${can ? '' : 'disabled'}><img src="/img/chip_peek.webp" alt=""><span>몰래 보고 넘기기</span><small>${can ? `${c.targets.length}명에게 넘길 수 있음` : S.canPass ? '모두 이미 본 카드' : '2인은 넘기기 없음'}</small></button>
     </div>`;
   } else if (mode === 'pass') {
     const c = S.chain;
@@ -676,7 +676,7 @@ function renderAct(mode) {
   } else if (mode === 'tribute') {
     const tr = S.tribute;
     const cn = tr.card === 'black' ? '검은 카드' : '신하 카드';
-    t.innerHTML = `${cn}${josa(cn, '을', '를')} 떠안았어요! 손으로 가져가는 대신…`;
+    t.innerHTML = tr.fromPenalty ? `벌칙 더미에서 ${cn}${josa(cn, '이', '가')} 나왔어요! 손으로 가져가는 대신…` : `${cn}${josa(cn, '을', '를')} 떠안았어요! 손으로 가져가는 대신…`;
     body.innerHTML = `<p class="hint-line"><b style="color:var(--ink)">“${claimSay(tr.claim)}”에 맞는 카드 1장</b>, 또는 <b style="color:var(--ink)">아무 카드 2장</b>을 손패에서 눌러 앞에 내려놓으세요 · ${sel.ids.length}장 고름</p>
       <div class="act-row"><button class="btn gold" id="bTrib" ${tributeValid() ? '' : 'disabled'}>내려놓기</button></div>`;
   }
@@ -786,7 +786,7 @@ function renderGame(prev) {
 
   const ed = S.cfg.edition;
   const edp = $('#gEd'); edp.textContent = ed === 'royal' ? '👑 로얄판' : '기본판'; edp.className = 'pill ed ' + ed;
-  $('#gLose').textContent = `같은 생물 ${S.loseAt}장이면 패배`;
+  $('#gLose').textContent = `같은 생물 ${S.loseAt}장이면 패배` + (S.removed ? ` · ${S.removed}장은 빼 두고 시작` : '') + (S.canPass ? '' : ' · 넘기기 없음');
   const sn = $('#gSpecN');
   sn.hidden = !(S.specs && S.specs.length);
   sn.textContent = isSpec() ? '관전 중' : `관전 ${S.specs ? S.specs.length : 0}명`;

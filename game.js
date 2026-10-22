@@ -243,7 +243,8 @@ function startGame(room) {
   room.loseAt = R.loseAt(ed, n);
   room.fx = null;
   const order = shuffle(room.players.slice());
-  const { hands, penalty } = R.deal(shuffle(R.makeDeck(ed)), n, ed);
+  const { hands, penalty, removed } = R.deal(shuffle(R.makeDeck(ed)), n, ed);
+  room.removed = removed.length;          // 기본판 2인 — 아무도 모르는 10장
   order.forEach((p, i) => { p.hand = hands[i]; p.row = R.emptyRow(ed); p.crowns = {}; });
   room.penalty = penalty;                 // 맨 끝 장이 펼쳐진 윗장
   // 처음 내미는 사람 — 로얄판은 한 장 더 받은 첫 사람, 기본판은 덜 받은 끝 사람
@@ -267,7 +268,14 @@ function finish(room, loser, why, kind) {
  * 내려놓인 카드는 fx 에 모아 두었다가 화면이 날아가는 모습을 그린다.
  */
 function place(room, p, card, src, fx) {
-  if (R.isSpecial(card)) { p.hand.push(card); fx.push({ k: card.k, src, toHand: true }); return; }   // 벌칙 더미에서 나온 특수 카드는 손으로
+  if (R.isSpecial(card)) {
+    // 벌칙 더미에서 특수 카드가 나왔다 — 원작 규칙서에 따로 없는 경우라, 떠안았을 때와 똑같이 손으로 가져가고 값을 치른다
+    // (그냥 손에 넣으면 벌칙이 오히려 좋은 패가 된다)
+    p.hand.push(card);
+    fx.push({ k: card.k, src, toHand: true });
+    (room.pendingTrib = room.pendingTrib || []).push(card.k);
+    return;
+  }
   p.row[card.k] = (p.row[card.k] || 0) + 1;
   if (card.r) p.crowns[card.k] = (p.crowns[card.k] || 0) + 1;
   fx.push({ k: card.k, r: !!card.r, src });
@@ -279,7 +287,13 @@ function afterPlace(room, p, fx) {
   room.fxSeq = (room.fxSeq || 0) + 1;
   room.fx = { seq: room.fxSeq, who: p.id, cards: fx };
   const over = Object.keys(p.row).find(k => p.row[k] >= room.loseAt);
-  if (over) return finish(room, p, 'four', over);
+  if (over) { room.pendingTrib = []; return finish(room, p, 'four', over); }
+  if (room.pendingTrib && room.pendingTrib.length) {
+    const k = room.pendingTrib.shift();
+    room.tribute = { who: p.id, claim: room.lastClaim, card: k, fromPenalty: true };
+    if (!tributeOptions(room, p).length) return settleTribute(room, p, []);
+    return nudge(room);
+  }
   room.starter = p.id;
   if (!p.hand.length) return finish(room, p, 'empty');
   nudge(room);
@@ -342,6 +356,8 @@ function call(room, p, sayTrue) {
     if (room.phase !== 'playing') return;
     const t = playerOf(room, taker);
     const claim = room.reveal.claim;
+    room.lastClaim = claim;
+    room.pendingTrib = [];
     room.reveal = null;
     if (!t) { nudge(room); return; }
     if (R.isSpecial(card)) {
@@ -531,6 +547,7 @@ function stateFor(room, me) {
     } : null,
     reveal: room.reveal,
     tribute: room.tribute,
+    removed: room.phase === 'lobby' ? R.removedSize(ed, room.players.length) : room.removed || 0,
     penalty: ed === 'royal' && room.phase !== 'lobby' ? { n: room.penalty.length, top: top ? { k: top.k, r: !!top.r } : null } : null,
     fx: room.fx,
     history: room.history,
@@ -840,8 +857,8 @@ function selfCheck() {
     const deck = R.makeDeck(ed);
     if (deck.length !== want[ed]) throw new Error(`${ed} 덱이 ${deck.length}장입니다 (${want[ed]}장이어야 함)`);
     for (let n = MIN_PLAYERS; n <= MAX_PLAYERS; n++) {
-      const { hands, penalty } = R.deal(deck, n, ed);
-      if (hands.reduce((a, h) => a + h.length, 0) + penalty.length !== deck.length) throw new Error(`${ed} ${n}인 나누기가 어긋납니다`);
+      const { hands, penalty, removed } = R.deal(deck, n, ed);
+      if (hands.reduce((a, h) => a + h.length, 0) + penalty.length + removed.length !== deck.length) throw new Error(`${ed} ${n}인 나누기가 어긋납니다`);
     }
   }
   console.log(`  기본판 64장 · 로얄판 65장 · ${MIN_PLAYERS}~${MAX_PLAYERS}인`);

@@ -36,7 +36,8 @@ for n in names:
 # 로얄판 — 왕 카드 7장(화려한 틀, 위 왕관 아래로 생물), 신하(크림 틀), 검은 카드, 로얄 뒷면
 rframe = Image.open('raw/rframe.png').convert('RGBA').resize((CW, CH), Image.LANCZOS)
 save(Image.open('raw/rback.png').convert('RGB').resize((CW, CH), Image.LANCZOS), 'rback')
-save(Image.open('raw/black.png').convert('RGB').resize((CW, CH), Image.LANCZOS), 'card_black')
+# 검은 카드는 원작처럼 가운데가 비어 있다 — black.png 의 나방 무늬를 걷어 낸 black_blank.png
+save(Image.open('raw/black_blank.png').convert('RGB').resize((CW, CH), Image.LANCZOS), 'card_black')
 for n in names[:7] + ['subject']:
     c = Image.open(f'{OUT}/k_{n}.png').convert('RGBA')
     c = c.crop(c.getbbox())
