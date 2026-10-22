@@ -476,7 +476,9 @@ body.in-game { overflow: hidden; }
 /* 손패 — 생물별 더미 */
 .hand-wrap { position: relative; z-index: 4; padding: 4px 10px max(10px, env(safe-area-inset-bottom)); display: flex; align-items: flex-end; justify-content: center; gap: 18px; }
 .hand-wrap .hand { min-width: 0; }
-.hand { display: flex; gap: 10px; justify-content: center; overflow-x: auto; padding: 18px 8px 6px; scrollbar-width: thin; }
+/* 넘치면 첫 장부터 보이게, 남으면 가운데로 — justify-content: center 는 넘칠 때 앞쪽이 잘린다 */
+.hand > :first-child { margin-left: auto; } .hand > :last-child { margin-right: auto; }
+.hand { display: flex; gap: 10px; justify-content: flex-start; overflow-x: auto; padding: 18px 8px 6px; scrollbar-width: thin; }
 .pile {
   position: relative; flex: none; width: 84px; aspect-ratio: 480 / 716; border: 0; padding: 0; background: none;
   transition: transform .2s cubic-bezier(.2, 1.4, .4, 1), filter .2s;
@@ -500,8 +502,8 @@ body.in-game { overflow: hidden; }
 .hand-empty { color: var(--muted); font-size: 14px; padding: 18px; }
 
 /* 표정 */
-.reacts { position: absolute; right: 12px; bottom: 140px; display: flex; flex-direction: column; gap: 4px; z-index: 5; }
-.reacts button { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: rgba(0, 0, 0, .45); font-size: 19px; transition: transform .15s; }
+.reacts { display: flex; gap: 2px; justify-content: center; margin-top: 4px; }
+.reacts button { width: 22px; height: 22px; padding: 0; border: 0; border-radius: 50%; background: none; font-size: 15px; line-height: 1; transition: transform .15s; }
 .reacts button:hover { transform: scale(1.15); }
 .float-emo { position: fixed; z-index: 30; font-size: 34px; pointer-events: none; animation: emo 1.8s ease-out forwards; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .5)); }
 @keyframes emo { 0% { transform: translate(-50%, 0) scale(.4); opacity: 0; } 15% { transform: translate(-50%, -14px) scale(1.2); opacity: 1; } 100% { transform: translate(-50%, -70px) scale(1); opacity: 0; } }
@@ -605,7 +607,10 @@ body.in-game { overflow: hidden; }
   .tok { width: 22px; height: 22px; border-radius: 6px; }
   .tok .n { min-width: 14px; height: 14px; font-size: 9.5px; right: -4px; bottom: -4px; }
   .row.big .tok { width: 30px; height: 30px; }
-  .table { display: flex; flex-direction: column; }
+  .table { display: flex; flex-direction: column; flex: 1 0 auto; }
+  /* 작은 폰 — 한 화면에 안 들어가면 겹치지 말고 아래로 스크롤 */
+  body.in-game { overflow-y: auto; }
+  #game { height: auto; min-height: 100vh; min-height: 100dvh; }
   .stage { position: relative; left: auto; top: auto; transform: none; margin: 4px auto 0; flex: 1; justify-content: center; min-height: 0; }
   .chain { min-height: 0; }
   .flip { width: 92px; } .flip.big { width: 118px; }
@@ -622,7 +627,7 @@ body.in-game { overflow: hidden; }
   .chip { width: 92px; font-size: 14px; } .chip img { width: 64px; height: 64px; }
   .pile { width: 62px; }
   .hand { justify-content: flex-start; gap: 8px; padding-top: 14px; }
-  .reacts { flex-direction: row; right: 50%; transform: translateX(50%); bottom: auto; top: 50px; display: none; }
+  .reacts { margin: 0 0 0 4px; flex-wrap: wrap; width: 70px; flex: none; }
   .bar { padding: 8px 10px; gap: 6px; }
   .pill { font-size: 11.5px; padding: 5px 9px; }
   #gLose { display: none; }

@@ -519,7 +519,9 @@ function renderSeats(mode) {
   opps.forEach((p, i) => {
     // 위쪽 호: 왼쪽(190°)에서 오른쪽(350°)까지 고르게. 한 명이면 한가운데 위
     const a = n === 1 ? 270 : 190 + (160 * i) / (n - 1);
-    const x = 50 + 41 * Math.cos(a * Math.PI / 180);
+    // 양 끝 자리가 화면 밖으로 잘리지 않게 안쪽으로 붙인다
+    const tw = box.clientWidth || innerWidth, half = 84 / tw * 100 + 0.8;
+    const x = Math.min(100 - half, Math.max(half, 50 + 41 * Math.cos(a * Math.PI / 180)));
     const y = 47 + 37 * Math.sin(a * Math.PI / 180);
     const cls = ['seat'];
     if (p.id === act) cls.push('now');
