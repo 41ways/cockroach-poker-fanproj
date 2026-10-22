@@ -217,6 +217,8 @@ input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(227, 191, 10
 .ed-badge img { width: 30px; border-radius: 4px; }
 .ed-badge b { color: var(--gold-hi); }
 .ed-badge small { color: var(--muted); }
+.rule-line { text-align: center; margin: 0 0 4px; font-size: 13.5px; color: var(--ink-2); }
+.rule-line b { color: var(--gold-hi); }
 .spec-note { text-align: center; color: var(--gold-hi); background: rgba(227, 191, 106, .1); border-radius: 12px; padding: 8px; margin: 6px 0; }
 
 .seat-cards { list-style: none; padding: 0; margin: 10px 0 6px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }

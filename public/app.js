@@ -413,6 +413,12 @@ function renderLobby() {
     + (S.specs && S.specs.length ? ` · 관전 ${S.specs.length}명` : '');
   $('#lSpecNote').hidden = !spec;
   $('#lEdShow').innerHTML = edBadge(S.cfg.edition);
+  // 지금 인원이면 어떤 규칙인지 — 2인은 원작 규칙서의 2인 규칙이 따로 있다
+  const n = S.players.length;
+  $('#lRule').innerHTML = n < 2 ? '두 명 이상이면 시작할 수 있어요' : `${n}명이면 — 같은 생물 <b>${S.loseAt}장</b>이면 패배`
+    + (S.canPass ? ' · 몰래 보고 넘기기 있음' : ' · <b>넘기기 없음</b>')
+    + (S.removed ? ` · 카드 <b>${S.removed}장</b>은 빼 두고 시작` : '')
+    + (S.cfg.edition === 'royal' ? ` · 벌칙 더미 <b>${n === 2 ? 16 : 7}장</b>` : '');
   const isHost = !spec && S.hostId === me;
 
   const ul = $('#lPlayers');

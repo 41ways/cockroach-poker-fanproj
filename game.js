@@ -120,7 +120,7 @@ function removePlayer(room, id) {
   const p = room.players[i];
   clearTimeout(p.leaveT);
   if (room.phase === 'playing') {
-    p.bot = true; p.ws = null; p.connected = true;
+    p.bot = true; p.ws = null; p.connected = true; p.stood = true;   // 사람이 떠나 봇이 이어받은 자리
     p.name = p.name.replace(/ \(봇\)$/, '') + ' (봇)';
     if (room.hostId === p.id) pickHost(room);
     nudge(room);                       // 이 사람 차례였으면 봇이 이어서 둔다
@@ -775,7 +775,7 @@ function handle(ws, msg) {
       room.phase = 'lobby';
       room.chain = null; room.reveal = null; room.tribute = null; room.loser = null; room.history = []; room.fx = null; room.penalty = [];
       // 판 중에 떠나 봇이 된 자리는 대기실로 돌아오면서 비운다 — 다음 판에 남이 쓴 봇이 끼지 않게
-      room.players = room.players.filter(p => !/ \(봇\)$/.test(p.name));
+      room.players = room.players.filter(p => !p.stood);
       for (const p of room.players) { p.hand = []; p.row = {}; p.crowns = {}; }
       for (const p of room.players) if (!p.bot && !p.connected) armLeave(room, p);
       if (!playerOf(room, room.hostId)) pickHost(room);
