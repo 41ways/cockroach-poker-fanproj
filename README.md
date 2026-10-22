@@ -81,6 +81,7 @@ rules.js       덱 · 나누기 · 맞는지 · 판정 (순수 함수, 서버와
 game.js        방 · 손패 · 오가는 카드 · 벌칙 더미 · 타이머 · 봇. 서버가 판을 전부 쥔다 (로보77 과 같은 짜임)
 worker.js      Cloudflare Workers 서버 — 소켓을 Durable Object 하나로 받아 game.js 에 넘긴다 (실제 서비스)
 server.js      Node 서버 — 같은 game.js 를 ws 로 띄운다 (로컬 개발 · 테스트)
+docs/          HANDOFF.md(인계) · OVERNIGHT.md(밤샘 기록)
 public/        화면 (index.html · style.css · app.js · img · fonts)
 test/rules.js  규칙 · 예외 상황 21가지 — 판정표, 2인 규칙, 왕 벌칙 연쇄, 특수 카드 값, 끊김 · 나가기 · 재접속, 관전, 권한
 test/sim.js    서버 없이 판을 수십 번 끝까지 — 카드 수 보존, 카드 정체가 안 본 사람·관전자에게 새지 않는지
