@@ -82,8 +82,11 @@ game.js        방 · 손패 · 오가는 카드 · 벌칙 더미 · 타이머 �
 worker.js      Cloudflare Workers 서버 — 소켓을 Durable Object 하나로 받아 game.js 에 넘긴다 (실제 서비스)
 server.js      Node 서버 — 같은 game.js 를 ws 로 띄운다 (로컬 개발 · 테스트)
 public/        화면 (index.html · style.css · app.js · img · fonts)
+test/rules.js  규칙 · 예외 상황 21가지 — 판정표, 2인 규칙, 왕 벌칙 연쇄, 특수 카드 값, 끊김 · 나가기 · 재접속, 관전, 권한
 test/sim.js    서버 없이 판을 수십 번 끝까지 — 카드 수 보존, 카드 정체가 안 본 사람·관전자에게 새지 않는지
+test/soak.js   방 수십 개를 동시에 — 수천 판, 끝나지 않는 판 · 정보 누출 · 봇이 무작위보다 나은지
 test/e2e.js    떠 있는 서버에 웹소켓 둘로 — 방 목록 · 입장 · 채팅 · 판 끝까지
+test/prod.js   배포본에서 실제 속도로 한 판 끝까지
 ```
 
 오가는 카드의 정체는 **그 카드를 본 사람(내민 사람 · 몰래 본 사람)에게만** 내려간다. 개발자 도구로도 볼 수 없다.
@@ -91,7 +94,9 @@ test/e2e.js    떠 있는 서버에 웹소켓 둘로 — 방 목록 · 입장 ·
 ## 테스트
 
 ```bash
-npm test                                   # test/sim.js
+npm test                                   # rules.js · sim.js · soak.js(400판)
+GAMES=3000 PAR=60 node test/soak.js        # 대량 시뮬레이션
+node test/prod.js royal 4                  # 배포본에서 한 판
 ROACH_FAST=1 PORT=8799 node server.js      # 한 창에서
 PORT=8799 node test/e2e.js                 # 다른 창에서
 ```
