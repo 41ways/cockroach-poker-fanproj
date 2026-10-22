@@ -855,7 +855,8 @@ function disconnect(ws, { keepSeat = false } = {}) {
 function sweepRooms(now = Date.now()) {
   for (const room of [...rooms.values()]) {
     const humans = room.players.filter(p => !p.bot && p.connected).length;
-    const seated = room.phase === 'lobby' && room.players.some(p => !p.bot);
+    // 사람이 앉아 있던 방은 모두 끊겨도 10분 기다린다 — 폰을 잠깐 잠갔다 돌아와도 판이 남아 있게(그동안 차례는 대신 둔다)
+    const seated = room.phase !== 'over' && room.players.some(p => !p.bot && !p.stood);
     if (humans === 0 && now - room.lastActive > (seated ? 10 * 60_000 : 90_000)) dropRoom(room);
   }
 }
