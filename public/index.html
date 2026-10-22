@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d241b">
+<title>바퀴벌레 포커</title>
+<meta name="description" content="허세와 눈치의 카드 게임 — 이 카드, 정말 박쥐일까? 2~6인 온라인 · 기본판과 로얄판">
+<link rel="preload" href="/fonts/gowun-b.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/img/title.webp" as="image">
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="/img/c_roach.webp" type="image/webp">
+</head>
+<body>
+
+<div class="felt" aria-hidden="true"></div>
+
+<!-- ───────────────── 타이틀 ───────────────── -->
+<section id="title" class="screen on">
+  <div class="hero">
+    <div class="hero-art">
+      <div class="hero-cards" aria-hidden="true">
+        <img class="hc hc1" src="/img/card_bat.webp" alt="">
+        <img class="hc hc2" src="/img/back.webp" alt="">
+        <img class="hc hc3" src="/img/card_k_toad.webp" alt="">
+      </div>
+      <img class="hero-img" src="/img/title.webp" alt="포커 카드를 든 바퀴벌레와 의심스러운 눈초리의 쥐·박쥐·거미·두꺼비">
+    </div>
+    <h1 class="logo"><span class="logo-sm">허세와 눈치의</span>바퀴벌레 포커</h1>
+    <p class="tag">“이건 박쥐야.” … 정말일까?</p>
+
+    <div class="title-actions">
+      <button id="bBegin" class="btn gold big">시작하기</button>
+      <button class="btn ghost" data-help>규칙 보기</button>
+    </div>
+    <p class="hero-foot">2~6인 온라인 · 기본판과 로얄판 · 혼자면 봇과 함께</p>
+    <p class="legal">이 프로젝트는 보드게임 『바퀴벌레 포커(Kakerlakenpoker)』와 『바퀴벌레 포커 로얄』을 구현한 학습 목적의 비공식 팬 프로젝트입니다.<br>본 프로젝트는 비영리이며, 어떠한 수익도 발생시키지 않습니다.<br>『바퀴벌레 포커』의 명칭 및 관련 상표에 대한 모든 권리는 원권리자(Drei Magier Spiele)에게 있습니다.<br>게임 내 모든 이미지는 AI로 생성한 창작물입니다.<br>원권리자의 요청이 있을 경우 즉시 프로젝트를 비공개 전환 또는 삭제하겠습니다.<br>문의: gyolno2@naver.com</p>
+  </div>
+</section>
+
+<!-- ───────────────── 방 고르기 ───────────────── -->
+<section id="setup" class="screen">
+  <div class="panel gate">
+    <img class="peek-art pa-gate" src="/img/c_rat.webp" alt="" aria-hidden="true">
+    <button id="bBack" class="back" aria-label="뒤로">‹</button>
+    <h2 class="panel-title">어느 테이블에 앉을까요</h2>
+
+    <label class="field">
+      <span>이름</span>
+      <input id="gName" maxlength="12" placeholder="포커페이스" autocomplete="off">
+    </label>
+
+    <div class="gate-grid">
+      <div class="gate-col">
+        <button id="bCreate" class="btn gold big">새 테이블 열기</button>
+        <label class="check"><input type="checkbox" id="gPriv"><span>비공개 <small>목록엔 '비공개'로만, 코드로만 입장</small></span></label>
+        <label class="check"><input type="checkbox" id="gSpec" checked><span>관전 허용 <small>시작한 방에도 구경하러 들어올 수 있어요</small></span></label>
+        <div class="or"><span>또는 코드로</span></div>
+        <div class="join-row">
+          <input id="gCode" maxlength="4" placeholder="ABCD" autocomplete="off" spellcheck="false">
+          <button id="bJoin" class="btn">입장</button>
+        </div>
+      </div>
+      <div class="gate-col">
+        <p class="rooms-head">열린 테이블 <span id="roomCount" class="muted"></span></p>
+        <ul id="roomList" class="room-list"></ul>
+        <p id="roomEmpty" class="room-empty">지금 열린 테이블이 없어요.<br>새로 열고 친구를 불러 보세요.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────── 대기실 ───────────────── -->
+<section id="lobby" class="screen">
+  <div class="panel lobby">
+    <img class="peek-art pa-lobby" src="/img/c_spider.webp" alt="" aria-hidden="true">
+    <header class="lobby-head">
+      <div class="code-box">
+        <p class="muted small">테이블 코드</p>
+        <p class="code" id="lCode">----</p>
+        <p class="muted small" id="lCount">1 / 6명</p>
+      </div>
+      <div class="ed-show" id="lEdShow"></div>
+      <div class="head-actions">
+        <button id="bCopy" class="btn ghost sm">초대 링크 복사</button>
+        <button class="btn ghost sm" data-help>규칙</button>
+        <button class="btn ghost sm icon" data-mute aria-label="소리">🔊</button>
+        <button id="bLeave1" class="btn ghost sm danger">나가기</button>
+      </div>
+    </header>
+    <p class="spec-note" id="lSpecNote" hidden>관전 중 — 자리가 나면 같이 해요</p>
+
+    <ul id="lPlayers" class="seat-cards"></ul>
+    <p class="muted small center" id="lFaceHint">내 얼굴을 누르면 다른 생물로 바꿀 수 있어요</p>
+
+    <div id="lHostBox" class="host-box">
+      <div class="opt ed-opt">
+        <p class="opt-title">어떤 판으로 할까요</p>
+        <div class="ed-pick" id="edPick">
+          <button data-ed="base"><img src="/img/back.webp" alt=""><b>기본판</b><small>생물 8종 × 8장</small></button>
+          <button data-ed="royal"><img src="/img/rback.webp" alt=""><b>로얄판</b><small>왕 · 신하 · 검은 카드</small></button>
+        </div>
+      </div>
+      <div class="opt">
+        <div class="opt-text"><p class="opt-title">생각할 시간</p><p class="opt-desc">시간이 지나면 봇처럼 알아서 둔다.</p></div>
+        <div class="seg" id="segTime">
+          <button data-ms="20000">20초</button>
+          <button data-ms="40000">40초</button>
+          <button data-ms="60000">60초</button>
+          <button data-ms="0">무제한</button>
+        </div>
+      </div>
+      <div class="opt">
+        <div class="opt-text"><p class="opt-title">비공개 테이블</p><p class="opt-desc">열린 목록에 코드가 안 뜬다.</p></div>
+        <button id="tPriv" class="toggle" role="switch" aria-checked="false"><span></span></button>
+      </div>
+      <div class="opt">
+        <div class="opt-text"><p class="opt-title">관전 허용</p><p class="opt-desc">자리가 나면 다음 판부터 같이 한다.</p></div>
+        <button id="tSpec" class="toggle" role="switch" aria-checked="true"><span></span></button>
+      </div>
+      <div class="lobby-actions">
+        <button id="bBot" class="btn ghost">봇 부르기</button>
+        <button id="bStart" class="btn gold big">게임 시작</button>
+      </div>
+    </div>
+    <p id="lWait" class="wait hidden">방장이 시작하기를 기다리는 중…</p>
+  </div>
+</section>
+
+<!-- ───────────────── 게임 ───────────────── -->
+<section id="game" class="screen">
+  <header class="bar">
+    <span class="pill ed" id="gEd">로얄판</span>
+    <span class="pill" id="gLose">4장이면 패배</span>
+    <span class="pill" id="gSpecN" hidden></span>
+    <span class="spacer"></span>
+    <button class="btn ghost sm icon" id="bHist" aria-label="지난 판정">📜</button>
+    <button class="btn ghost sm icon" data-help aria-label="규칙">?</button>
+    <button class="btn ghost sm icon" data-mute aria-label="소리">🔊</button>
+    <button id="bLeave2" class="btn ghost sm danger">나가기</button>
+  </header>
+
+  <div class="table" id="table">
+    <div class="opps" id="opps"></div>
+
+    <!-- 한가운데: 오가는 카드 · 벌칙 더미 · 안내 -->
+    <div class="stage" id="stage">
+      <div class="penalty" id="penalty" hidden>
+        <div class="pen-stack"><img src="/img/rback.webp" alt=""><img src="/img/rback.webp" alt=""></div>
+        <div class="pen-top" id="penTop"></div>
+        <p class="pen-n" id="penN">벌칙 더미</p>
+      </div>
+      <div class="chain" id="chain">
+        <div class="path" id="path"></div>
+        <div class="flip" id="flip">
+          <div class="flip-in">
+            <img class="face back" id="flipBack" src="/img/back.webp" alt="뒷면">
+            <div class="face front" id="flipFront"></div>
+          </div>
+        </div>
+        <div class="bubble" id="bubble" hidden></div>
+        <div class="verdict" id="verdict" hidden></div>
+      </div>
+      <p class="status" id="status"></p>
+    </div>
+
+  </div>
+
+  <!-- 할 일 판 -->
+  <div class="act" id="act" hidden>
+    <p class="act-title" id="actTitle"></p>
+    <div class="act-body" id="actBody"></div>
+  </div>
+
+  <div class="hand-wrap" id="handWrap">
+  <!-- 내 자리 -->
+    <div class="me" id="meZone">
+      <div class="me-head">
+        <span class="av" id="meAv"></span>
+        <div class="me-info">
+          <p class="me-name" id="meName"></p>
+          <p class="me-sub" id="meSub"></p>
+        </div>
+        <div class="row big" id="meRow"></div>
+      </div>
+    </div>
+    <div class="hand" id="hand"></div>
+  </div>
+
+  <div class="reacts" id="reacts">
+    <button data-e="0">😏</button><button data-e="1">🤔</button><button data-e="2">😱</button>
+    <button data-e="3">🙄</button><button data-e="4">🤥</button><button data-e="5">👏</button>
+  </div>
+</section>
+
+<!-- ───────────────── 끝 ───────────────── -->
+<section id="over" class="screen">
+  <div class="panel over">
+    <div class="over-art">
+      <img src="/img/r_laugh.webp" alt="웃음을 터뜨린 바퀴벌레" class="oa-laugh">
+      <img src="/img/r_loser.webp" alt="카드를 뒤집어쓴 두꺼비" class="oa-loser">
+    </div>
+    <h2 id="oTitle">패배</h2>
+    <p class="over-sub" id="oSub"></p>
+    <ul class="final" id="oFinal"></ul>
+    <p class="spec-note" id="oSpecNote" hidden>관전 중 — 다시 하면 자리가 나는 대로 같이 해요</p>
+    <div class="over-actions">
+      <button id="bAgain" class="btn gold big">한 판 더</button>
+      <button id="bLeave3" class="btn ghost">테이블 떠나기</button>
+    </div>
+    <p class="wait" id="oWait"></p>
+  </div>
+</section>
+
+<!-- ───────────────── 지난 판정 ───────────────── -->
+<aside id="hist" class="drawer" hidden>
+  <header><b>지난 판정</b><button class="x" id="histX" aria-label="닫기">✕</button></header>
+  <ol id="histList"></ol>
+</aside>
+
+<!-- ───────────────── 가이드 ───────────────── -->
+<div id="help" class="modal hidden">
+  <div class="sheet">
+    <header class="sheet-head">
+      <h2>바퀴벌레 포커 규칙</h2>
+      <button id="bHelpX" class="x" aria-label="닫기">✕</button>
+    </header>
+    <nav class="tabs" id="helpTabs">
+      <button class="on" data-tab="basic">기본</button>
+      <button data-tab="royal">로얄판</button>
+      <button data-tab="tips">요령</button>
+    </nav>
+    <div class="sheet-body">
+      <div class="tabpage on" data-page="basic">
+        <p class="lead">카드를 엎어서 남에게 내밀며 <b>“이건 ○○야”</b> 라고 말한다. 진짜든 거짓말이든 상관없다.</p>
+        <div class="kinds-strip" id="kindsStrip"></div>
+        <ol class="steps">
+          <li>카드를 받은 사람은 둘 중 하나를 고른다.
+            <ul>
+              <li><b>진짜다 / 거짓말!</b> — 외치고 카드를 뒤집는다. <b>맞히면 내민 사람이, 틀리면 내가</b> 그 카드를 앞에 펼쳐 둔다.</li>
+              <li><b>몰래 보고 넘기기</b> — 나만 몰래 보고, 아직 이 카드를 안 본 사람에게 다시 내민다. 말은 바꿔도 되고 그대로 해도 된다. 모두가 본 카드라면 마지막 사람은 반드시 외쳐야 한다.</li>
+            </ul>
+          </li>
+          <li>카드를 앞에 펼친 사람이 다음 카드를 내민다.</li>
+          <li><b>같은 생물 4장</b>이 내 앞에 쌓이면 진다. 카드를 내밀 차례인데 <b>손에 카드가 없어도</b> 진다.</li>
+          <li>진 사람 한 명을 빼고 모두가 이긴다.</li>
+        </ol>
+        <div class="callout"><b>기본판</b> — 바퀴벌레·쥐·노린재·전갈·두꺼비·박쥐·파리·거미, 8종 × 8장 = 64장을 모두 나눠 준다.</div>
+      </div>
+      <div class="tabpage" data-page="royal">
+        <p class="lead"><b>로얄판</b>은 거미가 빠진 7종 × 8장에, 특별한 카드 9장이 더 들어간다. (65장)</p>
+        <ul class="cardlist">
+          <li><img src="/img/card_k_bat.webp" alt=""><div><b>왕 카드 (7장)</b> 왕관 쓴 생물. 그 생물이라고 해도, <b>“왕”</b>이라고 해도 맞다. 왕 카드를 앞에 펼친 사람은 <b>벌칙 더미</b>의 펼쳐진 윗장도 가져와 앞에 펼친다(또 왕이면 한 장 더). 개수를 셀 때는 그 생물로 센다.</div></li>
+          <li><img src="/img/card_subject.webp" alt=""><div><b>신하</b> 아무 생물이라고 해도 맞다. 단, <b>“왕”</b>이라고 하면 틀린다.</div></li>
+          <li><img src="/img/card_black.webp" alt=""><div><b>검은 카드</b> 무엇이라고 해도 <b>틀린다.</b></div></li>
+        </ul>
+        <ol class="steps">
+          <li>말할 수 있는 것은 생물 7종과 <b>“왕”</b>.</li>
+          <li>처음에 <b>벌칙 더미</b> 7장을 엎어 두고 맨 윗장만 펼친다. 나머지를 나눠 주고, 남는 장은 첫 사람이 한 장 더 갖고 나머지는 벌칙 더미로 간다.</li>
+          <li><b>특수 카드(신하·검은 카드)를 떠안으면</b> 앞에 두지 않고 손으로 가져간다. 대신 마지막에 들은 말과 맞는 카드 1장을, 그런 카드가 없거나 내기 싫으면 아무 카드 2장을 손에서 앞에 펼친다.</li>
+          <li><b>2인 로얄</b> — 벌칙 더미 16장, 넘기기 없음, 같은 생물 <b>5장</b>이면 패배.</li>
+        </ol>
+      </div>
+      <div class="tabpage" data-page="tips">
+        <ul class="tips">
+          <li><b>앞에 3장 쌓인 생물은 약점이다.</b> 남들이 그 생물이라고 우기며 카드를 몰아줄 것이다.</li>
+          <li><b>이미 나온 카드를 세 보자.</b> 박쥐가 앞줄에 7장 깔려 있다면 “박쥐야”는 거의 거짓말이다.</li>
+          <li><b>몰래 보고 넘기면</b> 내가 진실을 쥔 쪽이 된다. 받은 사람은 내가 봤다는 걸 알고 더 의심한다.</li>
+          <li><b>손패가 줄어드는 것도 위험하다.</b> 내밀 카드가 없으면 그대로 진다.</li>
+          <li>로얄판에서는 <b>“왕”</b>이라는 말도 써 보자. 신하는 “왕”에만 틀리고, 검은 카드는 늘 틀린다.</li>
+          <li>표정 단추(😏🤔😱)로 허세를 부려 보자.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- 같은 방 사람끼리 하는 채팅 — 봇만 있는 방에서는 뜨지 않는다 (로보77 과 같다) -->
+<button id="chatBtn" class="chat-btn" hidden aria-label="채팅 열기">💬<span class="chat-n" id="chatN" hidden></span></button>
+<div id="chatPeek" class="chat-peek" hidden role="status" aria-live="polite"></div>
+<section id="chat" class="chat" hidden aria-label="채팅">
+  <header class="chat-head"><b>채팅</b><span class="chat-sub" id="chatWho"></span><button class="chat-x" id="chatX" aria-label="닫기">✕</button></header>
+  <div class="chat-log" id="chatLog"></div>
+  <form class="chat-in" id="chatForm">
+    <input id="chatText" maxlength="200" placeholder="테이블 사람들에게" autocomplete="off">
+    <button class="btn sm gold" type="submit">보내기</button>
+  </form>
+</section>
+
+<script src="/app.js"></script>
+
+<!-- 방문 통계와 오류 수집 — 허브와 같은 곳으로 모인다 (로보77 과 같다).
+     GoatCounter 는 쿠키를 쓰지 않고 개인을 가려내지 않는다. 오류는 메시지·파일·줄만 보낸다. -->
+<script>
+(function () {
+  var APP = "cockroach";
+  if (/^(localhost|127\.)/.test(location.hostname)) { window.norara = { ev: function () {}, live: function () {} }; return; }
+  window.goatcounter = { path: APP };
+  var sc = document.createElement("script");
+  sc.async = true;
+  sc.src = "https://gc.zgo.at/count.js";
+  sc.setAttribute("data-goatcounter", "https://41ways.goatcounter.com/count");
+  document.head.appendChild(sc);
+
+  var sid = (function () {
+    try {
+      var s = sessionStorage.getItem("norara.sid");
+      if (!s) { s = Math.random().toString(36).slice(2, 12) + Date.now().toString(36); sessionStorage.setItem("norara.sid", s); }
+      return s;
+    } catch (e) { return Math.random().toString(36).slice(2, 14); }
+  })();
+  var playing = false;
+  function beat(st) {
+    try {
+      navigator.sendBeacon("https://norara-errors.41ways.workers.dev/beat",
+        JSON.stringify({ app: APP, sid: sid, st: st || (playing ? "play" : "look") }));
+    } catch (e) {}
+  }
+  window.norara = {
+    ev: function (name, o) {
+      o = o || {}; o.app = APP; o.ev = name;
+      try { navigator.sendBeacon("https://norara-errors.41ways.workers.dev/ev", JSON.stringify(o)); } catch (e) {}
+      if (name === "start") window.norara.live(true);
+      if (name === "end") window.norara.live(false);
+    },
+    live: function (on) {
+      on = !!on;
+      if (on === playing) return;
+      playing = on;
+      if (document.visibilityState === "visible") beat();
+    }
+  };
+  setTimeout(function () { if (document.visibilityState === "visible") beat(); }, 2000);
+  setInterval(function () { if (document.visibilityState === "visible") beat(); }, 60000);
+  document.addEventListener("visibilitychange", function () { beat(document.visibilityState === "hidden" ? "gone" : null); });
+  addEventListener("pagehide", function () { beat("gone"); });
+  var came = Date.now(), told = false;
+  function leaving() {
+    if (told) return; told = true;
+    var sec = Math.round((Date.now() - came) / 1000);
+    if (sec >= 5) window.norara.ev("visit", { sec: sec });
+  }
+  addEventListener("pagehide", leaving);
+  document.addEventListener("visibilitychange", function () { if (document.visibilityState === "hidden") leaving(); });
+  var left = 5;
+  function send(o) {
+    if (left-- <= 0) return;
+    o.app = APP; o.page = location.pathname + location.search;
+    try { navigator.sendBeacon("https://norara-errors.41ways.workers.dev/report", JSON.stringify(o)); } catch (e) {}
+  }
+  addEventListener("error", function (e) {
+    if (!e.message) return;
+    send({ msg: e.message, src: e.filename, line: e.lineno, col: e.colno, stack: e.error && e.error.stack });
+  });
+  addEventListener("unhandledrejection", function (e) {
+    var r = e.reason;
+    send({ msg: "처리되지 않은 거절: " + ((r && r.message) || r), stack: r && r.stack });
+  });
+})();
+</script>
+</body>
+</html>

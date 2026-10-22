@@ -1,0 +1,10 @@
+node_modules/
+.DS_Store
+*.log
+.env
+
+# wrangler dev 가 남기는 로컬 상태 (Durable Object 저장소 등)
+.wrangler/
+
+# 제미나이 원본 · 글꼴 원본(TTF) — 커서 올리지 않는다. tools/ 로 public/ 을 다시 만든다
+raw/

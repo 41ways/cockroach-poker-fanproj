@@ -1,0 +1,5 @@
+# 그림·글꼴은 바뀔 일이 드물다 — 브라우저가 하루 동안 다시 받지 않게 (재방문 트래픽을 줄인다)
+/img/*
+  Cache-Control: public, max-age=86400
+/fonts/*
+  Cache-Control: public, max-age=604800
