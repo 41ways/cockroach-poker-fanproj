@@ -129,19 +129,9 @@ body:not(.in-game) .felt::before {
 #setup .panel, #lobby .panel { margin-top: 70px; }
 
 /* ───────────── 타이틀 ─────────────
-   바탕: 기본판 뒷면 와인 / 로얄판 뒷면 남색을 금선으로 비스듬히 가른다. 그림 양옆 카드도 그 쪽 판의 뒷면.
+   바탕: 다른 화면과 같은 초록 펠트(.felt). 그림 양옆 카드는 기본판 · 로얄판 뒷면.
    단추: 판정 칩 + 각진 판. 칩을 판 왼쪽 끝에 걸쳐 판 모서리가 칩 뒤로 숨게 한다. */
-#title { position: relative; align-items: center; justify-content: center; padding: 28px 16px 36px; overflow: hidden; isolation: isolate; }
-.split, .split i { position: absolute; inset: 0; }
-.split { z-index: -1; background: #120a12; }
-.sp-base { background: radial-gradient(ellipse at 18% 40%, #6d1d2a, #2a0810 72%); clip-path: polygon(0 0, 58% 0, 42% 100%, 0 100%); }
-.sp-royal { background: radial-gradient(ellipse at 82% 40%, #2c3b72, #0e1430 72%); clip-path: polygon(58% 0, 100% 0, 100% 100%, 42% 100%); }
-.split i.sp-seam { left: 42%; right: auto; width: 16%;
-  background: linear-gradient(to bottom right, transparent calc(50% - 2px), var(--gold) calc(50% - 1px), var(--gold-hi) 50%, var(--gold) calc(50% + 1px), transparent calc(50% + 2px));
-  -webkit-mask: linear-gradient(180deg, #000 0 34%, transparent 44% 94%, #000 99%); mask: linear-gradient(180deg, #000 0 34%, transparent 44% 94%, #000 99%); }
-.split::after { content: ''; position: absolute; left: 50%; top: 58%; width: 900px; height: 520px; margin: -260px 0 0 -450px;
-  background: radial-gradient(ellipse at 50% 50%, rgba(8, 6, 14, .6), transparent 66%); }
-
+#title { position: relative; align-items: center; justify-content: center; padding: 28px 16px 36px; overflow: hidden; }
 .hero { text-align: center; max-width: 760px; width: 100%; display: flex; flex-direction: column; align-items: center; }
 .hero-art { position: relative; width: min(600px, 92%); }
 .hero-img { width: 100%; display: block; filter: drop-shadow(0 22px 30px rgba(0, 0, 0, .6)); animation: bob 5s ease-in-out infinite; position: relative; z-index: 2; }
@@ -180,11 +170,6 @@ body:not(.in-game) .felt::before {
 .legal { margin: 24px auto 0; max-width: 600px; font-size: 10.5px; line-height: 1.6; color: rgba(217, 204, 170, .42); }
 @media (max-width: 700px) {
   #title { padding: 22px 18px 30px; justify-content: flex-start; }
-  .sp-base { clip-path: polygon(0 0, 100% 0, 100% 24%, 0 34%); background: radial-gradient(ellipse at 30% 0%, #6d1d2a, #2a0810 80%); }
-  .sp-royal { clip-path: polygon(0 34%, 100% 24%, 100% 100%, 0 100%); background: radial-gradient(ellipse at 70% 30%, #2c3b72, #0e1430 72%); }
-  .split i.sp-seam { left: 0; right: 0; width: auto; top: 24%; bottom: auto; height: 10%; -webkit-mask: none; mask: none;
-    background: linear-gradient(to bottom right, transparent calc(50% - 1.5px), var(--gold-hi) 50%, transparent calc(50% + 1.5px)); }
-  .split::after { display: none; }
   .hero-art { width: 100%; margin-top: 18px; }
   .hc { width: 21%; } .hc1 { left: -1%; } .hc2 { right: -1%; }
   .ribbon { padding: 10px 40px 12px; margin-top: -18px; font-size: 40px; }
