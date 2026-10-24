@@ -1,0 +1,8 @@
+# 윈도우 · 맥 어디서 받아도 같게 — 글은 저장소 안에서 LF, 셸 스크립트는 늘 LF
+* text=auto
+*.sh text eol=lf
+*.png binary
+*.jpg binary
+*.webp binary
+*.woff2 binary
+*.mp3 binary

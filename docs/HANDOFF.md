@@ -9,11 +9,22 @@
 |---|---|
 | 플레이 | https://cockroach.41ways.workers.dev |
 | GitHub | https://github.com/41ways/cockroach-poker-fanproj (공개, main) |
-| 폴더 | `C:\Users\정한결\cockroach-poker-fanproj` |
+| 폴더 | 윈도우 `C:\Users\정한결\cockroach-poker-fanproj` · 맥은 클론한 곳(예: `~/projects/cockroach-poker-fanproj`) |
 | 허브 | https://41ways.github.io/norara/ — 카드 등록됨, 추천 6번(`data-rec="6"`) |
 | 로컬 프리뷰 | `~/.claude/launch.json` 의 `cockroach` (node server.js, 8795 — 막혀 있으면 다른 포트로 뜬다) |
 
-**시작 전 `git pull`.** 사용자가 여러 세션·기기에서 만진다.
+**시작 전 `git pull`.** 사용자가 여러 세션·기기(윈도우 PC · 맥북)에서 만진다.
+
+### 윈도우 · 맥 어디서든
+
+- 코드 · 도구는 저장소 안 상대 경로만 쓴다. 한쪽 OS 전용 경로 · 명령을 넣지 말 것
+- `npm test` · `node test/soak.js 3000 60` 은 둘 다 같은 명령(`GAMES=…` 처럼 환경 변수를 앞에 붙이는 건 윈도우 cmd 에서 안 돼서 인자로 받는다)
+- 파이썬: 윈도우 `python`, 맥 `python3` (이 문서의 `python …` 은 맥에선 `python3 …`). Pillow · fontTools 필요
+- `npx`: 맥 · Git Bash 는 그대로, PowerShell 은 `npx.cmd`
+- `tools/grab.sh` 는 sh 스크립트 — 윈도우는 Git Bash, 맥은 터미널. GNU 전용 옵션을 쓰지 않는다
+- 줄 끝은 `.gitattributes` 가 맞춘다(셸 스크립트는 늘 LF)
+- `raw/`(제미나이 원본 · TTF)는 git 에 없고 만든 컴퓨터에만 있다. 게임에 쓰는 그림 · 글꼴(`public/`)은 저장소에 다 있어서 고치기만 할 땐 필요 없다. 원본에서 다시 굽거나 글꼴을 다시 자를 때만 필요 — 없으면 원본을 옮겨 오거나 그 부분만 다시 뽑는다
+- 로컬 프리뷰 설정(`launch.json`)은 기기마다 따로다. 없으면 `node server.js` 로 띄우는 항목을 만든다
 
 ## 무엇인가
 
@@ -50,7 +61,7 @@ raw/            제미나이 원본 · 글꼴 TTF — git 제외(.gitignore). �
 
 ```bash
 npm test                              # rules.js(21) · sim.js · soak.js 400판
-GAMES=3000 PAR=60 node test/soak.js   # 대량 — 실패 · 멈춘 판 · 정보 누출 · 무작위 대비 봇 실력
+node test/soak.js 3000 60             # 대량 — 실패 · 멈춘 판 · 정보 누출 · 무작위 대비 봇 실력
 node test/prod.js royal 4             # 배포본에서 실제 속도로 한 판(봇 + 무작위 자리)
 ROACH_FAST=1 PORT=8799 node server.js & PORT=8799 node test/e2e.js
 ```

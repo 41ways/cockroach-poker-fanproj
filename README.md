@@ -96,7 +96,7 @@ test/prod.js   배포본에서 실제 속도로 한 판 끝까지
 
 ```bash
 npm test                                   # rules.js · sim.js · soak.js(400판)
-GAMES=3000 PAR=60 node test/soak.js        # 대량 시뮬레이션
+node test/soak.js 3000 60                  # 대량 시뮬레이션
 node test/prod.js royal 4                  # 배포본에서 한 판
 ROACH_FAST=1 PORT=8799 node server.js      # 한 창에서
 PORT=8799 node test/e2e.js                 # 다른 창에서

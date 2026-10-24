@@ -1,6 +1,6 @@
 'use strict';
 /**
- * 대량 시뮬레이션 — GAMES=2000 node test/soak.js
+ * 대량 시뮬레이션 — node test/soak.js 2000 [동시 방 수]   (판 수. 윈도우·맥 같은 명령 — 환경 변수 GAMES 도 된다)
  * 방을 여러 개 동시에 돌린다. 방마다 '무작위로 두는 사람' 한 자리 + 나머지는 봇.
  * 매 상태마다: 카드 수 보존, 앞줄이 패배 기준을 넘지 않는지, 관전자 · 무작위 자리에 카드 정체가 새지 않는지.
  * 끝나면: 끝나지 않은 판, 판 길이, 지는 이유, 무작위 자리가 지는 비율(봇이 무작위보다 나은가).
@@ -10,8 +10,8 @@ const assert = require('assert');
 const R = require('../rules');
 const G = require('../game');
 
-const GAMES = Number(process.env.GAMES) || 600;
-const PAR = Number(process.env.PAR) || 40;
+const GAMES = Number(process.argv[2]) || Number(process.env.GAMES) || 600;
+const PAR = Number(process.argv[3]) || Number(process.env.PAR) || 40;
 const LIMIT_MS = 120_000;
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const randClaim = s => (Math.random() < 0.3 ? '!' : '') + pick(s.claims);
